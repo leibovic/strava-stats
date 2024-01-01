@@ -1,7 +1,9 @@
 // TODO: actually implement OAuth to get token
 // Follow steps here to manually get token: https://www.markhneedham.com/blog/2020/12/15/strava-authorization-error-missing-read-permission/
 const accessToken = '';
+
 const currentYear = new Date().getFullYear();
+const startYear = 2009;
 
 const getActivitiesUrl = function(before, after, page, perPage) {
     const activitiesUrl = new URL('https://www.strava.com/api/v3/athlete/activities');
@@ -32,8 +34,7 @@ const getActivities = async function(before, after, page = 1, activities = []) {
 
 const getActivitiesPerYear = async function() {
     var data = {};
-    // Hard coded to go back to 2010 but could be smarter to go back until no activites found
-    for (var year = currentYear; year > 2010; year--) {
+    for (var year = currentYear; year >= startYear; year--) {
         // This will query based on UTC so there is a time zone edge case if you did an activity
         // in a different year local time vs. UTC time
         var before = Math.floor(new Date(`${year}-12-31T23:59:59`).getTime() / 1000);
@@ -51,7 +52,7 @@ function getRunStats(data) {
     var runStats = {};
     var csv = '';
 
-    for (var year = 2010; year <= currentYear; year++) {
+    for (var year = startYear; year <= currentYear; year++) {
         if (!data[year]) {
             continue;
         }
