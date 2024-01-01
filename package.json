@@ -1,0 +1,12 @@
+{
+  "name": "strava-stats",
+  "version": "1.0.0",
+  "description": "Generate Strava annual metrics",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Margaret Leibovic <margaret.leibovic@gmail.com>",
+  "license": "ISC"
+}
