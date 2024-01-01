@@ -1,4 +1,5 @@
 // TODO: actually implement OAuth to get token
+// Follow steps here to manually get token: https://www.markhneedham.com/blog/2020/12/15/strava-authorization-error-missing-read-permission/
 const accessToken = '';
 const currentYear = new Date().getFullYear();
 
