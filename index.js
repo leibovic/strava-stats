@@ -5,7 +5,7 @@ const accessToken = '';
 const currentYear = new Date().getFullYear();
 const startYear = 2009;
 
-const getActivitiesUrl = function(before, after, page, perPage) {
+const getActivitiesUrl = (before, after, page, perPage) => {
     const activitiesUrl = new URL('https://www.strava.com/api/v3/athlete/activities');
     activitiesUrl.searchParams.append('before', before);
     activitiesUrl.searchParams.append('after', after);
@@ -14,36 +14,44 @@ const getActivitiesUrl = function(before, after, page, perPage) {
     return activitiesUrl;
 }
 
-const getActivities = async function(before, after, page = 1, activities = []) {
+const getActivities = async (before, after, page = 1, activities = []) => {
     const perPage = 100;
-    var url = getActivitiesUrl(before, after, page, perPage);
-    var response = await fetch(url.toString(), {
-        method: 'get',
-        headers: { Authorization: `Bearer ${accessToken}` }
-    });
+    const url = getActivitiesUrl(before, after, page, perPage);
+    try {
+        const response = await fetch(url.toString(), {
+            method: 'get',
+            headers: { Authorization: `Bearer ${accessToken}` }
+        });
 
-    var data = await response.json();
-    activities = activities.concat(data);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-    if (data.length < perPage) {
+        const data = await response.json();
+        activities = activities.concat(data);
+
+        if (data.length < perPage) {
+            return activities;
+        }
+        return getActivities(before, after, page + 1, activities);
+    } catch (error) {
+        console.error('Error fetching activities:', error);
         return activities;
     }
-    page++;
-    return getActivities(before, after, page, activities);
 }
 
-const getActivitiesPerYear = async function() {
-    var data = {};
-    for (var year = currentYear; year >= startYear; year--) {
+const getActivitiesPerYear = async () => {
+    const data = {};
+    for (let year = currentYear; year >= startYear; year--) {
         // This will query based on UTC so there is a time zone edge case if you did an activity
         // in a different year local time vs. UTC time
-        var before = Math.floor(new Date(`${year}-12-31T23:59:59`).getTime() / 1000);
-        var after = Math.floor(new Date(`${year}-01-01T00:00:00`).getTime() / 1000);
+        const before = Math.floor(new Date(`${year}-12-31T23:59:59`).getTime() / 1000);
+        const after = Math.floor(new Date(`${year}-01-01T00:00:00`).getTime() / 1000);
 
-        var activites = await getActivities(before, after);
-        data[year] = activites;
+        const activities = await getActivities(before, after);
+        data[year] = activities;
 
-        console.log(`Fetched data for ${year}: ${activites.length} activities`);
+        console.log(`Fetched data for ${year}: ${activities.length} activities`);
     }
     return data;
 }
@@ -87,6 +95,10 @@ function getRunStats(data) {
     return runStats;
 }
 
-var data = await getActivitiesPerYear();
-var runStats = getRunStats(data);
-console.log(runStats);
+const main = async () => {
+    const data = await getActivitiesPerYear();
+    const runStats = getRunStats(data);
+    console.log(runStats);
+}
+
+main();
