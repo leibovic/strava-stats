@@ -1,9 +1,59 @@
-// TODO: actually implement OAuth to get token
-// Follow steps here to manually get token: https://www.markhneedham.com/blog/2020/12/15/strava-authorization-error-missing-read-permission/
-const accessToken = '';
+import axios from 'axios';
+import express from 'express';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const app = express();
+const port = 3000;
+
+// Set EJS as the view engine
+app.set('view engine', 'ejs');
+
+// Home Route
+app.get('/', (req, res) => {
+    res.render('index', { authUrl: getStravaAuthUrl() });
+  });
+
+// Redirect to Strava for Authentication
+app.get('/auth/callback', async (req, res) => {
+    const code = req.query.code;
+
+    try {
+      // Exchange the authorization code for an access token
+      const tokenResponse = await axios.post('https://www.strava.com/oauth/token', {
+        client_id: process.env.CLIENT_ID,
+        client_secret: process.env.CLIENT_SECRET,
+        code,
+        grant_type: 'authorization_code',
+      });
+
+      // TODO: render a loading icon with explanation this takes time
+
+      const accessToken = tokenResponse.data.access_token;
+      const data = await getActivitiesPerYear(accessToken);
+      const runStats = getRunStats(data);
+
+      // Render the stats
+      res.render('stats', { runStats });
+    } catch (error) {
+      console.error(error);
+      res.send('An error occurred during authentication.');
+    }
+  });
+
+  // Generate Strava OAuth URL
+  function getStravaAuthUrl() {
+    const authUrl = `https://www.strava.com/oauth/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${process.env.REDIRECT_URI}&scope=activity:read`;
+    return authUrl;
+  }
+
+  app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+  });
 
 const currentYear = new Date().getFullYear();
-const startYear = 2009;
+const startYear = 2010;
 
 const getActivitiesUrl = (before, after, page, perPage) => {
     const activitiesUrl = new URL('https://www.strava.com/api/v3/athlete/activities');
@@ -14,41 +64,38 @@ const getActivitiesUrl = (before, after, page, perPage) => {
     return activitiesUrl;
 }
 
-const getActivities = async (before, after, page = 1, activities = []) => {
+const getActivities = async (accessToken, before, after, page = 1, activities = []) => {
     const perPage = 100;
     const url = getActivitiesUrl(before, after, page, perPage);
     try {
-        const response = await fetch(url.toString(), {
-            method: 'get',
+        console.log(`Making API rquest: ${url.toString()}`);
+        const response = await axios.get(url.toString(), {
             headers: { Authorization: `Bearer ${accessToken}` }
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
+        const data = response.data;
         activities = activities.concat(data);
 
         if (data.length < perPage) {
             return activities;
         }
-        return getActivities(before, after, page + 1, activities);
+        return getActivities(accessToken, before, after, page + 1, activities);
     } catch (error) {
         console.error('Error fetching activities:', error);
         return activities;
     }
 }
 
-const getActivitiesPerYear = async () => {
+const getActivitiesPerYear = async (accessToken) => {
     const data = {};
     for (let year = currentYear; year >= startYear; year--) {
+        console.log(`Fetching data for ${year}...`);
         // This will query based on UTC so there is a time zone edge case if you did an activity
         // in a different year local time vs. UTC time
         const before = Math.floor(new Date(`${year}-12-31T23:59:59`).getTime() / 1000);
         const after = Math.floor(new Date(`${year}-01-01T00:00:00`).getTime() / 1000);
 
-        const activities = await getActivities(before, after);
+        const activities = await getActivities(accessToken, before, after);
         data[year] = activities;
 
         console.log(`Fetched data for ${year}: ${activities.length} activities`);
@@ -94,11 +141,3 @@ function getRunStats(data) {
     console.log(csv);
     return runStats;
 }
-
-const main = async () => {
-    const data = await getActivitiesPerYear();
-    const runStats = getRunStats(data);
-    console.log(runStats);
-}
-
-main();
