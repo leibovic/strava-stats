@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // The year to start fetching activities from (set to a recent year to save time and API calls during development)
 const startYear = 2010;
