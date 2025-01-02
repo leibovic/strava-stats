@@ -14,7 +14,8 @@ app.set('view engine', 'ejs');
 
 // Home Route
 app.get('/', (req, res) => {
-    res.render('index', { authUrl: getStravaAuthUrl() });
+    const authUrl = `https://www.strava.com/oauth/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${process.env.REDIRECT_URI}&scope=activity:read`;
+    res.render('index', { authUrl: authUrl });
   });
 
 // Redirect to Strava for Authentication
@@ -30,32 +31,44 @@ app.get('/auth/callback', async (req, res) => {
         grant_type: 'authorization_code',
       });
 
-      // TODO: render a loading icon with explanation this takes time
-
       const accessToken = tokenResponse.data.access_token;
-      const data = await getActivitiesPerYear(accessToken);
-      const runStats = getRunStats(data);
 
-      // Render the stats
-      res.render('stats', { runStats });
+      // Redirect to the dashboard with the access token as a query parameter
+      res.redirect(`/dashboard?access_token=${accessToken}`);
     } catch (error) {
       console.error(error);
       res.send('An error occurred during authentication.');
     }
   });
 
-  // Generate Strava OAuth URL
-  function getStravaAuthUrl() {
-    const authUrl = `https://www.strava.com/oauth/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${process.env.REDIRECT_URI}&scope=activity:read`;
-    return authUrl;
-  }
+  // Dashboard route
+  app.get('/dashboard', async (req, res) => {
+    // Extract the access token from the query parameters
+    const accessToken = req.query.access_token;
+
+    // Render the dashboard with the access token
+    res.render('dashboard', { accessToken });
+  });
+
+    // API endpoint to fetch activities
+app.get('/api/activities', async (req, res) => {
+    const accessToken = req.query.access_token;
+
+    try {
+        const activitiesPerYear = await getActivitiesPerYear(accessToken);
+        const runStats = getRunStats(activitiesPerYear);
+
+        // Send the runStats as JSON
+        res.json({ runStats });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching activities.' });
+    }
+});
 
   app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
   });
-
-const currentYear = new Date().getFullYear();
-const startYear = 2024;
 
 const getActivitiesUrl = (before, after, page, perPage) => {
     const activitiesUrl = new URL('https://www.strava.com/api/v3/athlete/activities');
@@ -87,6 +100,9 @@ const getActivities = async (accessToken, before, after, page = 1, activities = 
         return activities;
     }
 }
+
+const currentYear = new Date().getFullYear();
+const startYear = 2024;
 
 const getActivitiesPerYear = async (accessToken) => {
     const data = {};
