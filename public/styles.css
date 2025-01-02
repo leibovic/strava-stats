@@ -6,6 +6,7 @@ body {
     height: 100vh;
     margin: 0;
     background-color: #f4f4f4;
+    flex-direction: column;
 }
 
 .container {
@@ -34,4 +35,23 @@ img {
     width: 200px;
     height: auto;
     margin-bottom: 20px;
+}
+
+footer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+footer p {
+    color: #555;
+    font-size: 14px;
+}
+
+footer a {
+    color: #fc4c02;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
 }
