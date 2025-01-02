@@ -7,6 +7,8 @@ dotenv.config();
 const app = express();
 const port = 3000;
 
+app.use(express.static('public')); // Serve static files from the 'public' directory
+
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 
@@ -53,7 +55,7 @@ app.get('/auth/callback', async (req, res) => {
   });
 
 const currentYear = new Date().getFullYear();
-const startYear = 2010;
+const startYear = 2024;
 
 const getActivitiesUrl = (before, after, page, perPage) => {
     const activitiesUrl = new URL('https://www.strava.com/api/v3/athlete/activities');
