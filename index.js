@@ -17,8 +17,7 @@ app.set("view engine", "ejs");
 
 // Home Route
 app.get("/", (req, res) => {
-  const redirectUri = `${req.protocol}://${req.get("host")}/auth/callback`;
-  const authUrl = `https://www.strava.com/oauth/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${redirectUri}&scope=activity:read`;
+  const authUrl = `https://www.strava.com/oauth/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${process.env.REDIRECT_URI}&scope=activity:read`;
   res.render("index", { authUrl: authUrl });
 });
 
