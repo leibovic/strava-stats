@@ -1,57 +1,55 @@
 body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f4f4f4;
-    flex-direction: column;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  background-color: #fff;
+  flex-direction: column;
 }
 
 .container {
-    text-align: center;
-    background: white;
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 500px;
-    width: 100%;
+  text-align: center;
+  background: white;
+  padding: 40px;
+  max-width: 500px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 h1 {
-    color: #000;
-    margin-bottom: 20px;
+  color: #000;
+  margin-bottom: 20px;
 }
 
 p {
-    color: #555;
-    font-size: 16px;
-    line-height: 1.5;
-    margin-bottom: 30px;
+  color: #333;
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 30px;
 }
 
 img {
-    width: 200px;
-    height: auto;
-    margin-bottom: 20px;
+  width: 200px;
+  height: auto;
+  margin-bottom: 20px;
 }
 
 footer {
-    margin-top: 20px;
-    text-align: center;
+  text-align: center;
+  padding: 0 40px;
 }
 
 footer p {
-    color: #555;
-    font-size: 14px;
+  color: #555;
+  font-size: 14px;
 }
 
 footer a {
-    color: #fc4c02;
-    text-decoration: none;
+  color: #fc4c02;
+  text-decoration: none;
 }
 
 footer a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
