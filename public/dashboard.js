@@ -1,6 +1,3 @@
-// The year to start fetching activities from (set to a recent year to save time and API calls during development)
-const startYear = 2010;
-
 document.addEventListener("DOMContentLoaded", function () {
   const accessToken = document.getElementById("accessToken").value;
   fetch(`/api/activities?access_token=${accessToken}`)
@@ -64,6 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function getRunStats(activitiesPerYear) {
   var runStats = {};
 
+  const startYear = 2010;
   const currentYear = new Date().getFullYear();
   for (var year = startYear; year <= currentYear; year++) {
     if (!activitiesPerYear[year]) {
