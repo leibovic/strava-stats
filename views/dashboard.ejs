@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Strava YEARS in Sport</title>
     <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/dashboard.js" defer></script>
   </head>
   <body>
@@ -13,22 +14,13 @@
       <h1>Your Run Stats</h1>
       <div class="loading">
         <p>Loading your stats, please wait...</p>
-        <p>(trust me, it's working, it can just take a minute or a few)</p>
+        <p>
+          Note: this may take a few minutes, depending on how many years you
+          have been using Strava. Please be patient and don't refresh the page!
+        </p>
       </div>
       <div class="stats" style="display: none">
-        <table id="statsTable" border="1">
-          <thead>
-            <tr>
-              <th>Year</th>
-              <th>Distance</th>
-              <th>Elevation Gain</th>
-              <th>Elapsed Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Data will be populated here by dashboard.js -->
-          </tbody>
-        </table>
+        <canvas id="statsChart" width="400" height="200"></canvas>
       </div>
     </div>
   </body>

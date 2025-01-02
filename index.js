@@ -7,6 +7,9 @@ dotenv.config();
 const app = express();
 const port = 3000;
 
+// The year to start fetching activities from (set to a recent year to save time and API calls during development)
+const startYear = 2010;
+
 app.use(express.static("public")); // Serve static files from the 'public' directory
 
 // Set EJS as the view engine
@@ -114,7 +117,6 @@ const getActivities = async (
 const getActivitiesPerYear = async (accessToken) => {
   const data = {};
   const currentYear = new Date().getFullYear();
-  const startYear = 2024;
   for (let year = currentYear; year >= startYear; year--) {
     console.log(`Fetching data for ${year}...`);
     // This will query based on UTC so there is a time zone edge case if you did an activity

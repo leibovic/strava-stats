@@ -1,22 +1,54 @@
+// The year to start fetching activities from (set to a recent year to save time and API calls during development)
+const startYear = 2010;
+
 document.addEventListener("DOMContentLoaded", function () {
   const accessToken = document.getElementById("accessToken").value;
   fetch(`/api/activities?access_token=${accessToken}`)
     .then((response) => response.json())
     .then((data) => {
-      const activitesPerYear = data.activitiesPerYear;
-      const runStats = getRunStats(activitesPerYear);
-      const tableBody = document.querySelector("#statsTable tbody");
-      tableBody.innerHTML = "";
+      const runStats = getRunStats(data.activitiesPerYear);
 
-      Object.keys(runStats).forEach((year) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${year}</td>
-            <td>${runStats[year].distance}</td>
-            <td>${runStats[year].elevationGain}</td>
-            <td>${runStats[year].elapsedTime}</td>
-          `;
-        tableBody.appendChild(row);
+      const years = Object.keys(runStats);
+      const distances = years.map((year) => runStats[year].distance);
+      const elevationGains = years.map((year) => runStats[year].elevationGain);
+      const elapsedTimes = years.map((year) => runStats[year].elapsedTime);
+
+      const ctx = document.getElementById("statsChart").getContext("2d");
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: years,
+          datasets: [
+            {
+              label: "Distance (km)",
+              data: distances,
+              borderColor: "rgba(75, 192, 192, 1)",
+              borderWidth: 1,
+              fill: false,
+            },
+            {
+              label: "Elevation Gain (m)",
+              data: elevationGains,
+              borderColor: "rgba(153, 102, 255, 1)",
+              borderWidth: 1,
+              fill: false,
+            },
+            {
+              label: "Elapsed Time (hours)",
+              data: elapsedTimes,
+              borderColor: "rgba(255, 159, 64, 1)",
+              borderWidth: 1,
+              fill: false,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
       });
 
       document.querySelector(".loading").style.display = "none";
@@ -31,10 +63,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function getRunStats(activitiesPerYear) {
   var runStats = {};
-  var csv = "";
 
   const currentYear = new Date().getFullYear();
-  const startYear = 2024;
   for (var year = startYear; year <= currentYear; year++) {
     if (!activitiesPerYear[year]) {
       continue;
@@ -53,23 +83,27 @@ function getRunStats(activitiesPerYear) {
       elevationGain += activity["total_elevation_gain"]; // meters
     }
 
-    var hours = Math.floor(elapsedTime / 60 / 60);
-    var minutes = Math.floor(elapsedTime / 60) - hours * 60;
-    var seconds = elapsedTime % 60;
-
     runStats[year] = {
-      distance: `${Math.round(distance / 1000)} km`,
-      elapsedTime:
-        hours.toString().padStart(2, "0") +
-        ":" +
-        minutes.toString().padStart(2, "0") +
-        ":" +
-        seconds.toString().padStart(2, "0"),
-      elevationGain: `${Math.floor(elevationGain)} m`,
+      distance: Math.round(distance / 1000), // km
+      elapsedTime: Math.floor(elapsedTime / 60 / 60), // hours
+      elevationGain: Math.floor(elevationGain), // meters
     };
-
-    csv = csv + [year, distance, elapsedTime, elevationGain].join(",") + "\n";
   }
 
   return runStats;
+}
+
+// Takes time in seconds and returns a formatted string
+function formatTime(elapsedTime) {
+  var hours = Math.floor(elapsedTime / 60 / 60);
+  var minutes = Math.floor(elapsedTime / 60) - hours * 60;
+  var seconds = elapsedTime % 60;
+
+  return (
+    hours.toString().padStart(2, "0") +
+    ":" +
+    minutes.toString().padStart(2, "0") +
+    ":" +
+    seconds.toString().padStart(2, "0")
+  );
 }
