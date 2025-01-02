@@ -1,62 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Strava YEARS in Sport</title>
-  <link rel="stylesheet" href="/styles.css">
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const accessToken = '<%= accessToken %>';
-      fetch(`/api/activities?access_token=${accessToken}`)
-        .then(response => response.json())
-        .then(data => {
-          const runStats = data.runStats;
-          const tableBody = document.querySelector('#statsTable tbody');
-          tableBody.innerHTML = '';
-
-          Object.keys(runStats).forEach(year => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${year}</td>
-              <td>${runStats[year].distance}</td>
-              <td>${runStats[year].elevationGain}</td>
-              <td>${runStats[year].elapsedTime}</td>
-            `;
-            tableBody.appendChild(row);
-          });
-
-          document.querySelector('.loading').style.display = 'none';
-          document.querySelector('.stats').style.display = 'block';
-        })
-        .catch(error => {
-          console.error('Error fetching activities:', error);
-          document.querySelector('.loading').innerText = 'An error occurred while fetching activities.';
-        });
-    });
-  </script>
-</head>
-<body>
-  <div class="container">
-    <div class="loading">
-      <p>Loading your stats, please wait...</p>
-    </div>
-    <div class="stats" style="display: none;">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Strava YEARS in Sport</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/dashboard.js" defer></script>
+  </head>
+  <body>
+    <div class="container">
+      <input type="hidden" id="accessToken" value="<%= accessToken %>" />
       <h1>Your Run Stats</h1>
-      <table id="statsTable" border="1">
-        <thead>
-          <tr>
-            <th>Year</th>
-            <th>Distance</th>
-            <th>Elevation Gain</th>
-            <th>Elapsed Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Data will be populated here by JavaScript -->
-        </tbody>
-      </table>
+      <div class="loading">
+        <p>Loading your stats, please wait...</p>
+        <p>(trust me, it's working, it can just take a minute or a few)</p>
+      </div>
+      <div class="stats" style="display: none">
+        <table id="statsTable" border="1">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Distance</th>
+              <th>Elevation Gain</th>
+              <th>Elapsed Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data will be populated here by dashboard.js -->
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-</body>
+  </body>
 </html>

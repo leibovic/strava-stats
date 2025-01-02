@@ -59,10 +59,7 @@ app.get("/api/activities", async (req, res) => {
 
   try {
     const activitiesPerYear = await getActivitiesPerYear(accessToken);
-    const runStats = getRunStats(activitiesPerYear);
-
-    // Send the runStats as JSON
-    res.json({ runStats });
+    res.json({ activitiesPerYear });
   } catch (error) {
     console.error(error);
     res
@@ -114,11 +111,10 @@ const getActivities = async (
   }
 };
 
-const currentYear = new Date().getFullYear();
-const startYear = 2024;
-
 const getActivitiesPerYear = async (accessToken) => {
   const data = {};
+  const currentYear = new Date().getFullYear();
+  const startYear = 2024;
   for (let year = currentYear; year >= startYear; year--) {
     console.log(`Fetching data for ${year}...`);
     // This will query based on UTC so there is a time zone edge case if you did an activity
@@ -137,47 +133,3 @@ const getActivitiesPerYear = async (accessToken) => {
   }
   return data;
 };
-
-function getRunStats(data) {
-  var runStats = {};
-  var csv = "";
-
-  for (var year = startYear; year <= currentYear; year++) {
-    if (!data[year]) {
-      continue;
-    }
-    var distance = 0;
-    var elapsedTime = 0;
-    var elevationGain = 0;
-
-    for (var i in data[year]) {
-      var activity = data[year][i];
-      if (activity.type != "Run") {
-        continue;
-      }
-      distance += activity["distance"]; // meters
-      elapsedTime += activity["elapsed_time"]; // seconds
-      elevationGain += activity["total_elevation_gain"]; // meters
-    }
-
-    var hours = Math.floor(elapsedTime / 60 / 60);
-    var minutes = Math.floor(elapsedTime / 60) - hours * 60;
-    var seconds = elapsedTime % 60;
-
-    runStats[year] = {
-      distance: `${Math.round(distance / 1000)} km`,
-      elapsedTime:
-        hours.toString().padStart(2, "0") +
-        ":" +
-        minutes.toString().padStart(2, "0") +
-        ":" +
-        seconds.toString().padStart(2, "0"),
-      elevationGain: `${Math.floor(elevationGain)} m`,
-    };
-
-    csv = csv + [year, distance, elapsedTime, elevationGain].join(",") + "\n";
-  }
-
-  console.log(csv);
-  return runStats;
-}
